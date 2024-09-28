@@ -3,10 +3,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.services';
 import * as bcrypt from "bcrypt"
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma:PrismaService){}
+  constructor(private readonly prisma:PrismaService ,
+           private readonly jwtService: JwtService,
+           private readonly configService :ConfigService,
+  ){}
 
   async createUser(createUserDto: CreateUserDto) {
     try {
@@ -32,6 +38,42 @@ export class UserService {
       throw new InternalServerErrorException("failed to registered user")
     }
   }
+
+
+
+  //login users
+  
+  
+async loginUser(loginUserDto){
+  try {
+    const{email,password} =loginUserDto
+    const user =await this.prisma.user.findUnique({
+      where:{
+        email
+      }
+    })
+
+    if(!user){
+      throw new BadRequestException("user not found")
+    }
+
+    // compare password
+
+    const isMatch =await bcrypt.compare(password,user.password)
+    console.log(isMatch)
+  if(!isMatch){
+    throw new BadRequestException("invalid incredentials")
+  }
+  // create token 
+  const token = await this.jwtService.signAsync({sub:user.id},{expiresIn:"1d",secret:this.configService.get<string>("JWT_SECRET")})
+     return {message:"user logged in" ,user:user,token}
+  } catch (error) {
+    throw new InternalServerErrorException("unable to log user in")
+  }
+
+}
+
+
 
  async findAllUsers() {
 

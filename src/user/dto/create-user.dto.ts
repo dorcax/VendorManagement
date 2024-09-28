@@ -15,3 +15,15 @@ export class CreateUserDto {
     email:string
 
 }
+
+
+export class LoginUserDto{
+@IsNotEmpty()
+@IsString() 
+email:string
+
+
+ @IsNotEmpty()
+ @IsString()
+ password:string
+}
