@@ -25,6 +25,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.20.0",
+    "bcrypt": "^5.1.1",
     "class": "^0.1.4",
     "class-validator": "^0.14.1",
     "prisma": "^5.20.0",
