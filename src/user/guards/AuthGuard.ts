@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { Request } from "express";
 
 
 @Injectable()
@@ -17,9 +18,7 @@ export class AuthGuard implements CanActivate{
             throw new UnauthorizedException("invalid credential")
         }
 
-        const payload = await this.jwtService.verifyAsync(token,{
-            secret:this.configService.get<string>("JWT_SECRET")
-        })
+        const payload = await this.jwtService.verifyAsync(token)
         request.user =payload
       } catch (error) {
         throw new UnauthorizedException("invalid credentials")
@@ -29,9 +28,9 @@ export class AuthGuard implements CanActivate{
         
     }
 
-    private ExtractFromHeader(request){
-        const authHeader =request.headers.authorization()
-        if(authHeader &authHeader.startWith("Bearer")){
+    private ExtractFromHeader(request:Request){
+        const authHeader =request.headers.authorization
+        if(authHeader && authHeader.startsWith("Bearer")){
             return authHeader.split(" ")[1]
         }
         return undefined;

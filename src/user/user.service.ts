@@ -65,10 +65,13 @@ async loginUser(loginUserDto){
     throw new BadRequestException("invalid incredentials")
   }
   // create token 
-  const token = await this.jwtService.signAsync({sub:user.id},{expiresIn:"1d",secret:this.configService.get<string>("JWT_SECRET")})
-     return {message:"user logged in" ,user:user,token}
+  const token = await this.jwtService.signAsync({sub:user.id})
+     return {user:user,token}
   } catch (error) {
-    throw new InternalServerErrorException("unable to log user in")
+
+console.log(error)
+
+    throw new InternalServerErrorException("unable to log user in",error.message)
   }
 
 }
