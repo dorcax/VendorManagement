@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { PrismaService } from './prisma.services';
 
 
 
@@ -12,19 +14,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal:true
     }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('EXPIRY') },
-      }),
-      inject: [ConfigService],
-    })
+    AuthModule
 
   ]
   ,
   controllers: [AppController],
   providers: [AppService],
-  exports:[JwtModule]
+  // exports:[JwtModule]
 })
 export class AppModule {}

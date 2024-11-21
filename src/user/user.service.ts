@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, InternalServerErrorException,BadRequestException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.services';
 import * as bcrypt from "bcrypt"
@@ -14,65 +14,29 @@ export class UserService {
            private readonly configService :ConfigService,
   ){}
 
-  async createUser(createUserDto: CreateUserDto) {
-    try {
-      const{email,password,name} =createUserDto
-    // find the user
-    const userExist =await this.prisma.user.findUnique({
-      where:{email}})
-      
-      if(userExist){
-      throw new ConflictException("user email already exist")
-    }
-    const user =await this.prisma.user.create({
-      data:{
-       name,
-       email,
-       password:await bcrypt.hash(password,10)
-      }
-    })
-
-
-    return user;
-    } catch (error) {
-      throw new InternalServerErrorException("failed to registered user")
-    }
-  }
-
 
 
   //login users
   
   
-async loginUser(loginUserDto){
-  try {
-    const{email,password} =loginUserDto
+async findUser(email:string){
+  // try {
+    
+    console.log('Login DTO:', email);
     const user =await this.prisma.user.findUnique({
       where:{
-        email
+        email:email
       }
-    })
+    }) // compare password
+
+    
 
     if(!user){
       throw new BadRequestException("user not found")
     }
+    return user
 
-    // compare password
 
-    const isMatch =await bcrypt.compare(password,user.password)
-    console.log(isMatch)
-  if(!isMatch){
-    throw new BadRequestException("invalid incredentials")
-  }
-  // create token 
-  const token = await this.jwtService.signAsync({sub:user.id})
-     return {user:user,token}
-  } catch (error) {
-
-console.log(error)
-
-    throw new InternalServerErrorException("unable to log user in",error.message)
-  }
 
 }
 
